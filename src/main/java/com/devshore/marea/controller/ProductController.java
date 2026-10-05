@@ -32,6 +32,7 @@ public class ProductController {
         newProduct.setName(productDTO.getName());
         newProduct.setPrice(productDTO.getPrice());
         Product productSaved = productRepository.save(newProduct);
-        return new ResponseEntity<>(productSaved, HttpStatus.CREATED);
+        ProductDTO productDto = new ProductDTO(productSaved.getName(), productSaved.getPrice());
+        return new ResponseEntity<>(productDto, HttpStatus.CREATED);
     }
 }

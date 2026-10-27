@@ -10,10 +10,7 @@ import com.devshore.marea.repository.ProductRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +26,24 @@ public class OrderController {
         this.productRepository = productRepository;
     }
 
+
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        List<OrderResponse> responseList = new ArrayList<>();
+
+        for (Order order : orders) {
+            List<OrderResponse.Item> responseItems = new ArrayList<>();
+            for (OrderItem item : order.getItems()) {
+                responseItems.add(new OrderResponse.Item(
+                        item.getProduct().getId(), item.getProduct().getName(),
+                        item.getQuantity(), item.getUnitPrice()));
+            }
+            responseList.add(new OrderResponse(order.getId(), order.getOwner(), responseItems, order.getTotalPrice()));
+        }
+
+        return ResponseEntity.ok(responseList);
+    }
     @PostMapping
     @Transactional
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request) {

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,10 +36,12 @@ class OrderControllerTest {
     void returnsAllOrdersWithTheirItemsAndTotals() {
         UUID orderId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
+        Instant createdAt = Instant.parse("2026-10-26T12:00:00Z");
         Product product = product(productId, "Cafe", 3.5);
         Order order = new Order();
         order.setId(orderId);
         order.setOwner("Ana");
+        order.setCreatedAt(createdAt);
         order.addItem(new OrderItem(product, 2));
         when(orderRepository.findAll()).thenReturn(List.of(order));
 
@@ -48,6 +51,7 @@ class OrderControllerTest {
         assertEquals(List.of(new OrderResponse(
                 orderId,
                 "Ana",
+                createdAt,
                 List.of(new OrderResponse.Item(productId, "Cafe", 2, 3.5)),
                 7.0)), response.getBody());
         verify(orderRepository).findAll();
@@ -115,6 +119,7 @@ class OrderControllerTest {
         UUID firstProductId = UUID.randomUUID();
         UUID secondProductId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
+        Instant createdAt = Instant.parse("2026-10-26T12:00:00Z");
         Product firstProduct = product(firstProductId, "Cafe", 3.5);
         Product secondProduct = product(secondProductId, "Te", 2.0);
         when(productRepository.findById(firstProductId)).thenReturn(Optional.of(firstProduct));
@@ -122,6 +127,7 @@ class OrderControllerTest {
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
             Order order = invocation.getArgument(0);
             order.setId(orderId);
+            order.setCreatedAt(createdAt);
             return order;
         });
 
@@ -134,6 +140,7 @@ class OrderControllerTest {
         OrderResponse body = assertInstanceOf(OrderResponse.class, response.getBody());
         assertEquals(orderId, body.id());
         assertEquals("Ana", body.owner());
+        assertEquals(createdAt, body.createdAt());
         assertEquals(13.0, body.totalPrice());
         assertEquals(List.of(
                 new OrderResponse.Item(firstProductId, "Cafe", 2, 3.5),

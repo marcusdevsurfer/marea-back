@@ -39,7 +39,8 @@ public class OrderController {
                         item.getProduct().getId(), item.getProduct().getName(),
                         item.getQuantity(), item.getUnitPrice()));
             }
-            responseList.add(new OrderResponse(order.getId(), order.getOwner(), responseItems, order.getTotalPrice()));
+            responseList.add(new OrderResponse(
+                    order.getId(), order.getOwner(), order.getCreatedAt(), responseItems, order.getTotalPrice()));
         }
 
         return ResponseEntity.ok(responseList);
@@ -75,6 +76,7 @@ public class OrderController {
 
         Order savedOrder = orderRepository.save(order);
         return ResponseEntity.status(HttpStatus.CREATED).body(new OrderResponse(
-                savedOrder.getId(), savedOrder.getOwner(), responseItems, savedOrder.getTotalPrice()));
+                savedOrder.getId(), savedOrder.getOwner(), savedOrder.getCreatedAt(),
+                responseItems, savedOrder.getTotalPrice()));
     }
 }
